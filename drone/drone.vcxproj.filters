@@ -88,5 +88,8 @@
     <None Include="..\Debug\config\drone.ini">
       <Filter>Configuration</Filter>
     </None>
+    <None Include="..\README">
+      <Filter>Configuration</Filter>
+    </None>
   </ItemGroup>
 </Project>
