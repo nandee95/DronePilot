@@ -126,6 +126,7 @@
     <ClInclude Include="Constants.hpp" />
     <ClInclude Include="escapi.h" />
     <ClInclude Include="Functions.hpp" />
+    <ClInclude Include="Hud.hpp" />
     <ClInclude Include="Hud_Altitude.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="Hud_Canvas.hpp" />
@@ -136,6 +137,7 @@
     <ClInclude Include="Log.hpp" />
     <ClInclude Include="Protocol.hpp" />
     <ClInclude Include="ResourceManager.hpp" />
+    <ClInclude Include="ScopedPtr.hpp" />
     <ClInclude Include="SerialPort.hpp" />
   </ItemGroup>
   <ItemGroup>

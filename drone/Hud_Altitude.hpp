@@ -2,8 +2,9 @@
 
 #include <SFML/Graphics.hpp>
 #include "ResourceManager.hpp"
+#include "Hud.hpp"
 
-class Hud_Altitude : public sf::Drawable, public sf::Transformable
+class Hud_Altitude : public Hud
 {
 	sf::VertexArray lines;
 	sf::RectangleShape indicator;
@@ -13,7 +14,7 @@ class Hud_Altitude : public sf::Drawable, public sf::Transformable
 	sf::Clock framerate;
 
 public:
-	Hud_Altitude()
+	Hud_Altitude(const sf::Vector2i& resolution,const float& scale)
 	{
 		lines.setPrimitiveType(sf::Lines);
 		lines.append(sf::Vertex(sf::Vector2f(0, 0), sf::Color::White));
@@ -40,6 +41,8 @@ public:
 		altitude.setOrigin(-55.0, 20.0);
 		altitude.setOutlineColor(sf::Color::Black);
 		altitude.setOutlineThickness(2.f);
+
+		setPosition(sf::Vector2f(20.f,resolution.y - 20.f));
 	}
 
 	const void Set(float value)
@@ -48,7 +51,7 @@ public:
 		framerate.restart();
 	}
 
-	const void Update()
+	virtual void Update()
 	{
 		if ((int)alt != (int)target)
 		{

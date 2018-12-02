@@ -4,7 +4,7 @@
 #include "Functions.hpp"
 #include "Constants.hpp"
 
-class Hud_Roll : public sf::Drawable, public sf::Transformable
+class Hud_Roll : public Hud
 {
 	sf::VertexArray s_circle, s_circle2, s_mark;
 	float angle = 0.0f;
@@ -12,7 +12,7 @@ class Hud_Roll : public sf::Drawable, public sf::Transformable
 	sf::VertexArray r_circle, r_circle2, r_mark;
 	sf::Clock framerate;
 public:
-	Hud_Roll()
+	Hud_Roll(const sf::Vector2i& resolution,const float& scale)
 	{
 		s_circle.setPrimitiveType(sf::TrianglesStrip);
 		s_circle2.setPrimitiveType(sf::TrianglesStrip);
@@ -96,6 +96,8 @@ public:
 		r_mark.append(sf::Vertex(sf::Vector2f(235.0, 0.0), sf::Color::White));
 		r_mark.append(sf::Vertex(sf::Vector2f(-230.0, 0.0), sf::Color::White));
 		r_mark.append(sf::Vertex(sf::Vector2f(-235.0, 0.0), sf::Color::White));
+
+		setPosition(sf::Vector2f(resolution.x / 2.0, resolution.y / 2.0));
 	}
 
 	static float sign(float value)
@@ -103,7 +105,7 @@ public:
 		return value > 0 ? 1.0 : -1.0;
 	}
 
-	const void Update()
+	virtual void Update()
 	{
 		if ((int)angle != (int)target)
 		{

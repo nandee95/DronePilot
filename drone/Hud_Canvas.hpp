@@ -11,10 +11,27 @@ class Hud_Canvas : public sf::Drawable, public sf::Transformable
 	bool active = false;
 public:
 
-	Hud_Canvas()
+	Hud_Canvas(const sf::Vector2i& resolution,const sf::Vector2i camresolution)
 	{
-		texture.create(800, 600);
-		canvas.setSize(sf::Vector2f(800, 600));
+		texture.create(camresolution.x, camresolution.y);
+
+		float scale = 1.f;
+		if ((float)resolution.x / resolution.y > (float)camresolution.x / camresolution.y)
+		{
+			scale = (float)resolution.y / camresolution.y;
+
+			canvas.setPosition(sf::Vector2f(resolution.x / 2.f - camresolution.x*scale / 2.f,0.f));
+		}
+		else
+		{
+			scale = (float)resolution.x / camresolution.x;
+
+			canvas.setPosition(sf::Vector2f(0.f,resolution.y / 2.f - camresolution.y*scale / 2.f));
+		}
+		canvas.setSize(sf::Vector2f(camresolution.x*scale, camresolution.y*scale));
+
+
+
 		canvas.setTexture(&texture);
 		bgra.loadFromMemory(
 			"void main() \

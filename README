@@ -3,3 +3,5 @@ Work in progress
 Dependencies:
 SFML
 escapi
+
+This project will be eventually coverted for cmake

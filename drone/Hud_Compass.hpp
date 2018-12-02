@@ -5,8 +5,9 @@
 #include "Functions.hpp"
 #include "Constants.hpp"
 #include <iostream>
+#include "Hud.hpp"
 
-class Hud_Compass : public sf::Drawable, public sf::Transformable
+class Hud_Compass : public Hud
 {
 	sf::RectangleShape needle;
 	sf::Texture t_needle;
@@ -18,14 +19,16 @@ class Hud_Compass : public sf::Drawable, public sf::Transformable
 	float target = 0.f;
 	sf::Clock framerate;
 public:
-	Hud_Compass()
+	Hud_Compass(const sf::Vector2i& resolution, const float& hud_scale)
 	{
+		setPosition(60, 70);
+		
 		face.setRadius(50);
 		face.setOrigin(50.0, 50.0);
 		face.setFillColor(sf::Color::Transparent);
 		face.setOutlineColor(sf::Color::White);
 		face.setOutlineThickness(2);
-
+		
 		lines.setPrimitiveType(sf::Lines);
 		const float step = Constants::pi / 8.0f;
 		uint8_t cnt = 0;
@@ -80,10 +83,12 @@ public:
 		degree.setScale(0.5, 0.5);
 		sf::FloatRect bounds = degree.getLocalBounds();
 		degree.setOrigin(sf::Vector2f(bounds.width, bounds.height+14.f) / 2.f);
+
+		setPosition(sf::Vector2f(resolution)-sf::Vector2f(120.0,120.0));
 	}
 
 
-	const void Update()
+	virtual void Update()
 	{
 		if ((int)angle != (int)target)
 		{
@@ -115,7 +120,7 @@ public:
 	{
 		states.transform = getTransform();
 		states.transform.translate(50, 50);
-		//target.draw(face, states);
+		target.draw(face, states);
 		states.transform.rotate(-angle);
 		target.draw(lines, states);
 		states.transform.rotate(angle);

@@ -16,22 +16,26 @@
 #include "CfgFile.hpp"
 #include "Log.hpp"
 
+#include "ScopedPtr.hpp"
+
 class Application
 {
 	SerialPort sp;
-	Hud_Compass compass;
+	ScopedPtr<Hud_Compass> hud_compass;
 	Hud_RF s_rf;
 	Hud_CAM s_cam;
-	Hud_Altitude alt;
-	Hud_Roll roll;
-	Hud_Canvas canvas;
+	ScopedPtr<Hud_Altitude> hud_altitude;
+	ScopedPtr<Hud_Roll> hud_roll;
+	ScopedPtr<Hud_Canvas> canvas;
 	Hud_Debug debug;
+
 
 	bool running = true;
 
 	//Config
 	CfgFile cfg;
-	sf::Vector2i resolution=sf::Vector2i(800, 600);
+	sf::Vector2i resolution = sf::Vector2i(800, 600);
+	sf::Vector2i camResolution = sf::Vector2i(800, 600);
 	float hud_scale = 1.0;
 
 	//Serial
@@ -63,7 +67,8 @@ public:
 				} },
 				{ "Camera",{
 					{ "Enabled",{ CfgFile::BoolValidator ,"True" } },
-					{ "FriendlyName",{ CfgFile::AnyValidator, "???" } }
+					{ "FriendlyName",{ CfgFile::AnyValidator, "???" } },
+					{ "Resolution",{ CfgFile::ResolutionValidator, "800x600" } },
 				} },
 				{ "Window",{
 					{ "Title",{ CfgFile::AnyValidator, "Drone controller" } },
@@ -84,6 +89,7 @@ public:
 
 		camenabled = cfg.GetValue("Camera", "Enabled").ToBool();
 		resolution = cfg.GetValue("Window", "Resolution").ToResolution();
+		camResolution = cfg.GetValue("Camera", "Resolution").ToResolution();
 		hud_scale = cfg.GetValue("Hud", "Scale").ToFloat();
 		Log::Success("Config loaded successfully!");
 	}
@@ -114,7 +120,7 @@ public:
 			{
 				s_cam.SetStatus(0);
 				s_cam.SetString("Disconnected");
-				canvas.Reset();
+				canvas->Reset();
 
 				Log::Warning("Camera disconnected!");
 				if (reconnect_camera->joinable()) reconnect_camera->join();
@@ -122,7 +128,7 @@ public:
 			} break;
 			case Camera::Event_Frame:
 			{
-				canvas.Update(cam.GetFrame());
+				canvas->Update(cam.GetFrame());
 			} break;
 			}
 		});
@@ -175,6 +181,7 @@ public:
 			std::this_thread::sleep_for(std::chrono::microseconds(33333));
 		}
 	}
+
 	const void InitSerial()
 	{
 		sp.SetCallback([&](SerialPort::EventType e) {
@@ -235,8 +242,9 @@ public:
 		Camera::Init();
 
 		LoadConfig();
-		InitCamera();
 		InitSerial();
+		InitCamera();
+		InitHud();
 	}
 
 	~Application()
@@ -249,7 +257,6 @@ public:
 		if (reconnect_camera && reconnect_camera->joinable())
 			reconnect_camera->join();
 	}
-
 
 	static const void TryConnectSerial(Application* t)
 	{
@@ -285,7 +292,6 @@ public:
 		}
 	}
 
-
 	static const void TryConnectCamera(Application* t)
 	{
 		while (!t->cam.IsConnected() && t->running)
@@ -295,7 +301,7 @@ public:
 
 			try
 			{
-				t->cam.Connect(Camera::FindDevice(t->cfg.GetValue("Camera", "FriendlyName")));
+				t->cam.Connect(Camera::FindDevice(t->cfg.GetValue("Camera", "FriendlyName")),t->camResolution);
 				break;
 			}
 			catch (CameraException& e)
@@ -306,6 +312,21 @@ public:
 				std::this_thread::sleep_for(std::chrono::milliseconds(750));
 			}
 		}
+	}
+
+	const void InitHud()
+	{
+		uint8_t mode = cfg.GetValue("Window", "Mode").ToInt(); // 1 - windowed, 2 - borderless, 3 - fullscreen
+		if (mode == 2)
+		{
+			const sf::VideoMode vmode = sf::VideoMode().getDesktopMode();
+			resolution = sf::Vector2i(vmode.width, vmode.height);
+		}
+
+		canvas = new Hud_Canvas(resolution, camResolution);
+		hud_altitude = new Hud_Altitude(resolution, hud_scale);
+		hud_compass = new Hud_Compass(resolution,hud_scale);
+		hud_roll = new Hud_Roll(resolution,hud_scale);
 	}
 
 	const int Run()
@@ -328,9 +349,6 @@ public:
 			case 2: //Borderless
 			{
 				style = sf::Style::None;
-
-				const sf::VideoMode vmode = sf::VideoMode().getDesktopMode();
-				resolution = sf::Vector2i(vmode.width, vmode.height);
 				window.setMouseCursorVisible(false);
 			}	break;
 			case 3: //Fullscreen
@@ -361,18 +379,16 @@ public:
 		{ \n \
 			vec2 pos = gl_FragCoord.xy/vec2("+std::to_string(resolution.x)+"," + std::to_string(resolution.y) + "); \n \
 			vec4 pixel = texture2D(texture, vec2(pos.x,1-pos.y)); \n \
-			gl_FragColor= vec4(asd(pixel.rgb),1.0); \n \
+			gl_FragColor= vec4(asd(pixel.rgb),1.0-pixel.a); \n \
 		}");
 
 		sf::RenderStates inverseStates;
 		inverseStates.shader = &inverse;
-		inverseStates.texture = &canvas.GetTexture();
+		inverseStates.texture = &canvas->GetTexture();
 
-		compass.setPosition(680, 480);
 		s_rf.setPosition(20, 20);
 		s_cam.setPosition(20, 40);
-		alt.setPosition(20, 580);
-		roll.setPosition(400,300);
+		//alt.setPosition(20, 580);
 		sf::Event e;
 		while (window.isOpen())
 		{
@@ -391,18 +407,19 @@ public:
 				}
 			}
 
-			roll.Update();
-			compass.Update();
-			alt.Update();
+			hud_roll->Update();
+			hud_compass->Update();
+			hud_altitude->Update();
 
 			window.clear(sf::Color::Black);
-			if(camenabled) window.draw(canvas);
+			if(camenabled) window.draw(*canvas);
 
 			window.draw(s_rf);
 			window.draw(s_cam);
-			window.draw(compass, inverseStates);
-			window.draw(alt, inverseStates);
-			window.draw(roll, inverseStates);
+			window.draw(*hud_compass, inverseStates);
+			window.draw(*hud_roll, inverseStates);
+			
+			window.draw(*hud_altitude, inverseStates);
 
 			window.draw(debug);
 			window.display();

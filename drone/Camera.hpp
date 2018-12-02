@@ -108,7 +108,7 @@ public:
 		return timeout;
 	}
 
-	const void Connect(const uint32_t cam=0)
+	const void Connect(const uint32_t cam,const sf::Vector2i resolution)
 	{
 		device = cam;
 		if (!callback)
@@ -128,8 +128,8 @@ public:
 			throw CameraException(CameraException::Error_NoDeviceFound, "No capture device found!");
 		}
 
-		capture.mWidth = 800;
-		capture.mHeight = 600;
+		capture.mWidth = resolution.x;
+		capture.mHeight = resolution.y;
 		capture.mTargetBuf = new int[800 * 600];
 				
 		if (!initCapture(device, &capture))
@@ -146,6 +146,11 @@ public:
 		if (thread) thread->detach();
 		thread = std::make_shared<std::thread>(&Camera::CameraThread, this);
 		callback(Event_Connected);
+	}
+
+	const sf::Vector2i GetResolution() const
+	{
+		return sf::Vector2i(capture.mWidth,capture.mHeight);
 	}
 
 	const void Disconnect()
