@@ -4,4 +4,12 @@ Dependencies:
 SFML
 escapi
 
-This project will be eventually coverted for cmake
+Advanced drone pilot software for hobby drones.
+CAD files, circuits, full source code going to be available in the next month stay tuned
+
+Used hardware:
+NRF24 radio communication moudle
+mpu9250 gyro + accelerometer + compass
+STM32 mpu
+
+As soon as the project is ready it will be converted for CMake and Unix systems
