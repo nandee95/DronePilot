@@ -20,20 +20,20 @@ public:
 		{
 			const float next = i + 0.08726;
 
-			sf::Vertex v1(sf::Vector2f(std::cosf(i)*250.0, std::sinf(i)*250.0), sf::Color::White); //Outer current
-			sf::Vertex v2(sf::Vector2f(std::cosf(next)*248.0, std::sinf(next)*248.0), sf::Color::White); //Inner current
-			sf::Vertex v3(sf::Vector2f(std::cosf(i)*250.0, std::sinf(i)*250.0), sf::Color::White); //Outer next
-			sf::Vertex v4(sf::Vector2f(std::cosf(next)*248.0, std::sinf(next)*248.0), sf::Color::White); //Outer next
+			sf::Vertex v1(sf::Vector2f(std::cosf(i)*250.0*scale, std::sinf(i)*250.0*scale), sf::Color::White); //Outer current
+			sf::Vertex v2(sf::Vector2f(std::cosf(next)*248.0*scale, std::sinf(next)*248.0*scale), sf::Color::White); //Inner current
+			sf::Vertex v3(sf::Vector2f(std::cosf(i)*250.0*scale, std::sinf(i)*250.0*scale), sf::Color::White); //Outer next
+			sf::Vertex v4(sf::Vector2f(std::cosf(next)*248.0*scale, std::sinf(next)*248.0*scale), sf::Color::White); //Outer next
 			
 			s_circle.append(v2);
 			s_circle.append(v1);
 			s_circle.append(v4);
 			s_circle.append(v3);
 
-			v1 = sf::Vertex(sf::Vector2f(std::cosf(i + Constants::pi)*250.0, std::sinf(i + Constants::pi)*250.0), sf::Color::White); //Outer current
-			v2 = sf::Vertex(sf::Vector2f(std::cosf(next + Constants::pi)*248.0, std::sinf(next + Constants::pi)*248.0), sf::Color::White); //Inner current
-			v3 = sf::Vertex(sf::Vector2f(std::cosf(i + Constants::pi)*250.0, std::sinf(i + Constants::pi)*250.0), sf::Color::White); //Outer next
-			v4 = sf::Vertex(sf::Vector2f(std::cosf(next + Constants::pi)*248.0, std::sinf(next + Constants::pi)*248.0), sf::Color::White); //Outer next
+			v1 = sf::Vertex(sf::Vector2f(std::cosf(i + Constants::pi)*250.0*scale, std::sinf(i + Constants::pi)*250.0*scale), sf::Color::White); //Outer current
+			v2 = sf::Vertex(sf::Vector2f(std::cosf(next + Constants::pi)*248.0*scale, std::sinf(next + Constants::pi)*248.0*scale), sf::Color::White); //Inner current
+			v3 = sf::Vertex(sf::Vector2f(std::cosf(i + Constants::pi)*250.0*scale, std::sinf(i + Constants::pi)*250.0*scale), sf::Color::White); //Outer next
+			v4 = sf::Vertex(sf::Vector2f(std::cosf(next + Constants::pi)*248.0*scale, std::sinf(next + Constants::pi)*248.0*scale), sf::Color::White); //Outer next
 
 			s_circle2.append(v2);
 			s_circle2.append(v1);
@@ -46,20 +46,20 @@ public:
 		for (float i = -0.43633; i <= 0.43633; i += 0.08726)//5 deg
 		{
 			s_mark.append(sf::Vertex(sf::Vector2f(
-				std::cosf(i)*250.0,
-				std::sinf(i)*250.0
+				std::cosf(i)*250.0*scale,
+				std::sinf(i)*250.0*scale
 			), sf::Color::White));
 			s_mark.append(sf::Vertex(sf::Vector2f(
-				std::cosf(i)*(state ? 245.0 : 240.0),
-				std::sinf(i)*(state ? 245.0 : 240.0)
+				std::cosf(i)*(state ? 245.0 : 240.0)*scale,
+				std::sinf(i)*(state ? 245.0 : 240.0)*scale
 			), sf::Color::White));
 			s_mark.append(sf::Vertex(sf::Vector2f(
-				std::cosf(i + Constants::pi)*250.0,
-				std::sinf(i + Constants::pi)*250.0
+				std::cosf(i + Constants::pi)*250.0*scale,
+				std::sinf(i + Constants::pi)*250.0*scale
 			), sf::Color::White));
 			s_mark.append(sf::Vertex(sf::Vector2f(
-				std::cosf(i + Constants::pi)*(state ? 245.0 : 240.0),
-				std::sinf(i + Constants::pi)*(state ? 245.0 : 240.0)
+				std::cosf(i + Constants::pi)*(state ? 245.0 : 240.0)*scale,
+				std::sinf(i + Constants::pi)*(state ? 245.0 : 240.0)*scale
 			), sf::Color::White));
 			state = !state;
 		}
@@ -70,20 +70,20 @@ public:
 		{
 			const float next = i + 0.08726;
 
-			sf::Vertex v1(sf::Vector2f(std::cosf(i)*230.0, std::sinf(i)*230.0), sf::Color::White); //Outer current
-			sf::Vertex v2(sf::Vector2f(std::cosf(next)*229.0, std::sinf(next)*229.0), sf::Color::White); //Inner current
-			sf::Vertex v3(sf::Vector2f(std::cosf(i)*230.0, std::sinf(i)*230.0), sf::Color::White); //Outer next
-			sf::Vertex v4(sf::Vector2f(std::cosf(next)*229.0, std::sinf(next)*229.0), sf::Color::White); //Outer next
+			sf::Vertex v1(sf::Vector2f(std::cosf(i)*230.0*scale, std::sinf(i)*230.0*scale), sf::Color::White); //Outer current
+			sf::Vertex v2(sf::Vector2f(std::cosf(next)*229.0*scale, std::sinf(next)*229.0*scale), sf::Color::White); //Inner current
+			sf::Vertex v3(sf::Vector2f(std::cosf(i)*230.0*scale, std::sinf(i)*230.0*scale), sf::Color::White); //Outer next
+			sf::Vertex v4(sf::Vector2f(std::cosf(next)*229.0*scale, std::sinf(next)*229.0*scale), sf::Color::White); //Outer next
 
 			r_circle.append(v2);
 			r_circle.append(v1);
 			r_circle.append(v4);
 			r_circle.append(v3);
 
-			v1 = sf::Vertex(sf::Vector2f(std::cosf(i + Constants::pi)*230.0, std::sinf(i + Constants::pi)*230.0), sf::Color::White); //Outer current
-			v2 = sf::Vertex(sf::Vector2f(std::cosf(next + Constants::pi)*229.0, std::sinf(next + Constants::pi)*229.0), sf::Color::White); //Inner current
-			v3 = sf::Vertex(sf::Vector2f(std::cosf(i + Constants::pi)*230.0, std::sinf(i + Constants::pi)*230.0), sf::Color::White); //Outer next
-			v4 = sf::Vertex(sf::Vector2f(std::cosf(next + Constants::pi)*229.0, std::sinf(next + Constants::pi)*229.0), sf::Color::White); //Outer next
+			v1 = sf::Vertex(sf::Vector2f(std::cosf(i + Constants::pi)*230.0*scale, std::sinf(i + Constants::pi)*230.0*scale), sf::Color::White); //Outer current
+			v2 = sf::Vertex(sf::Vector2f(std::cosf(next + Constants::pi)*229.0*scale, std::sinf(next + Constants::pi)*229.0*scale), sf::Color::White); //Inner current
+			v3 = sf::Vertex(sf::Vector2f(std::cosf(i + Constants::pi)*230.0*scale, std::sinf(i + Constants::pi)*230.0*scale), sf::Color::White); //Outer next
+			v4 = sf::Vertex(sf::Vector2f(std::cosf(next + Constants::pi)*229.0*scale, std::sinf(next + Constants::pi)*229.0*scale), sf::Color::White); //Outer next
 
 			r_circle2.append(v2);
 			r_circle2.append(v1);
@@ -92,10 +92,10 @@ public:
 		}
 
 		r_mark.setPrimitiveType(sf::Lines);
-		r_mark.append(sf::Vertex(sf::Vector2f(230.0, 0.0), sf::Color::White));
-		r_mark.append(sf::Vertex(sf::Vector2f(235.0, 0.0), sf::Color::White));
-		r_mark.append(sf::Vertex(sf::Vector2f(-230.0, 0.0), sf::Color::White));
-		r_mark.append(sf::Vertex(sf::Vector2f(-235.0, 0.0), sf::Color::White));
+		r_mark.append(sf::Vertex(sf::Vector2f(230.0*scale, 0.0), sf::Color::White));
+		r_mark.append(sf::Vertex(sf::Vector2f(235.0*scale, 0.0), sf::Color::White));
+		r_mark.append(sf::Vertex(sf::Vector2f(-230.0*scale, 0.0), sf::Color::White));
+		r_mark.append(sf::Vertex(sf::Vector2f(-235.0*scale, 0.0), sf::Color::White));
 
 		setPosition(sf::Vector2f(resolution.x / 2.0, resolution.y / 2.0));
 	}

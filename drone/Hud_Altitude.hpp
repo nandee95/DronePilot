@@ -17,28 +17,28 @@ public:
 	Hud_Altitude(const sf::Vector2i& resolution,const float& scale)
 	{
 		lines.setPrimitiveType(sf::Lines);
-		lines.append(sf::Vertex(sf::Vector2f(0, 0), sf::Color::White));
-		lines.append(sf::Vertex(sf::Vector2f(0, -200), sf::Color::White));
-		lines.append(sf::Vertex(sf::Vector2f(0, 0), sf::Color::White));
-		lines.append(sf::Vertex(sf::Vector2f(15, 0), sf::Color::White));
-		lines.append(sf::Vertex(sf::Vector2f(0, -50), sf::Color::White));
-		lines.append(sf::Vertex(sf::Vector2f(10, -50), sf::Color::White));
-		lines.append(sf::Vertex(sf::Vector2f(0, -100), sf::Color::White));
-		lines.append(sf::Vertex(sf::Vector2f(15, -100), sf::Color::White));
-		lines.append(sf::Vertex(sf::Vector2f(0, -150), sf::Color::White));
-		lines.append(sf::Vertex(sf::Vector2f(10, -150), sf::Color::White));
-		lines.append(sf::Vertex(sf::Vector2f(0, -200), sf::Color::White));
-		lines.append(sf::Vertex(sf::Vector2f(15, -200), sf::Color::White));
+		lines.append(sf::Vertex(sf::Vector2f(0, 0)*scale, sf::Color::White));
+		lines.append(sf::Vertex(sf::Vector2f(0, -200)*scale, sf::Color::White));
+		lines.append(sf::Vertex(sf::Vector2f(0, 0)*scale, sf::Color::White));
+		lines.append(sf::Vertex(sf::Vector2f(15, 0)*scale, sf::Color::White));
+		lines.append(sf::Vertex(sf::Vector2f(0, -50)*scale, sf::Color::White));
+		lines.append(sf::Vertex(sf::Vector2f(10, -50)*scale, sf::Color::White));
+		lines.append(sf::Vertex(sf::Vector2f(0, -100)*scale, sf::Color::White));
+		lines.append(sf::Vertex(sf::Vector2f(15, -100)*scale, sf::Color::White));
+		lines.append(sf::Vertex(sf::Vector2f(0, -150)*scale, sf::Color::White));
+		lines.append(sf::Vertex(sf::Vector2f(10, -150)*scale, sf::Color::White));
+		lines.append(sf::Vertex(sf::Vector2f(0, -200)*scale, sf::Color::White));
+		lines.append(sf::Vertex(sf::Vector2f(15, -200)*scale, sf::Color::White));
 
 		indicator.setOutlineColor(sf::Color::Red);
 		indicator.setOutlineThickness(2);
-		indicator.setSize(sf::Vector2f(20.0,0.0));
+		indicator.setSize(sf::Vector2f(20.0,0.0)*scale);
 
 		altitude.setScale(0.5,0.5);
 		altitude.setFillColor(sf::Color::White);
 		altitude.setFont(*ResourceManager::LoadFont("fonts/arial.ttf"));
 		altitude.setString("0 m");
-		altitude.setOrigin(-55.0, 20.0);
+		altitude.setOrigin(-55.0*scale, 20.0);
 		altitude.setOutlineColor(sf::Color::Black);
 		altitude.setOutlineThickness(2.f);
 
@@ -74,10 +74,10 @@ public:
 	{
 		states.transform = getTransform();
 		target.draw(lines, states);
-		target.draw(indicator, states);
 		const sf::Shader* old = states.shader;
 		states.shader = nullptr;
 		target.draw(altitude, states);
+		target.draw(indicator, states);
 	}
 
 };
