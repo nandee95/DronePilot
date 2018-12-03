@@ -149,6 +149,17 @@ public:
 		std::string errors = "";
 		std::smatch matches;
 		std::string currentGroup = "";
+
+		std::map <std::string, std::map<std::string, bool>> found;
+
+		for (auto& x : validator)
+		{
+			for (auto& y : x.second)
+			{
+				found[x.first][y.first]=false;
+			}
+		}
+
 		while (std::getline(fs, line))
 		{
 			//Skip lines that contains only whitespace or comment
@@ -168,7 +179,7 @@ public:
 					errors += "Value failed validation: " + static_cast<std::string>(matches[3]) + "\n";
 					continue;
 				}
-
+				found[currentGroup][matches[1]] = true;
 				this->data[currentGroup][matches[1]]=matches[3];
 			} //Match groups
 			else if (std::regex_match(line, matches, group) && matches.ready())
@@ -194,6 +205,16 @@ public:
 			}
 		}
 
+		for (auto& x : found)
+		{
+			for (auto& y : x.second)
+			{
+				if (!y.second)
+				{
+					errors += "Value not found for variable: " + x.first + " : " + y.first + "\n";
+				}
+			}
+		}
 
 		if (errors != "")
 		{
