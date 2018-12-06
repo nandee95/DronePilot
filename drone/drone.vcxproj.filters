@@ -89,6 +89,9 @@
     <ClInclude Include="Hud.hpp">
       <Filter>Header Files\HUD</Filter>
     </ClInclude>
+    <ClInclude Include="Hud_TopBar.hpp">
+      <Filter>Header Files\HUD</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Debug\config\drone.ini">

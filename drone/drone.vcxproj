@@ -134,6 +134,7 @@
     <ClInclude Include="Hud_Debug.hpp" />
     <ClInclude Include="Hud_Status.hpp" />
     <ClInclude Include="Hud_Roll.hpp" />
+    <ClInclude Include="Hud_TopBar.hpp" />
     <ClInclude Include="Log.hpp" />
     <ClInclude Include="Protocol.hpp" />
     <ClInclude Include="ResourceManager.hpp" />

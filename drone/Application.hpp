@@ -12,6 +12,7 @@
 #include "Hud_Roll.hpp"
 #include "Hud_Canvas.hpp"
 #include "Hud_Debug.hpp"
+#include "Hud_TopBar.hpp"
 
 #include "CfgFile.hpp"
 #include "Log.hpp"
@@ -28,6 +29,7 @@ class Application
 	ScopedPtr<Hud_Altitude> hud_altitude;
 	ScopedPtr<Hud_Roll> hud_roll;
 	ScopedPtr<Hud_Canvas> canvas;
+	ScopedPtr<Hud_TopBar> hud_topbar;
 	Hud_Debug debug;
 
 
@@ -328,6 +330,7 @@ public:
 		hud_altitude = new Hud_Altitude(resolution, hud_scale);
 		hud_compass = new Hud_Compass(resolution,hud_scale);
 		hud_roll = new Hud_Roll(resolution,hud_scale);
+		hud_topbar = new Hud_TopBar(resolution, hud_scale);
 	}
 
 	const int Run()
@@ -360,66 +363,8 @@ public:
 
 			window.create(sf::VideoMode(resolution.x, resolution.y),cfg.GetValue("Window","Title").ToString(),style, settings);
 		}
-		sf::Shader inverse;
-		{
-			//Precalculated values
-			float ratio = (float)resolution.x / resolution.y;
-			float camratio = (float)camResolution.x / camResolution.y;
-
-			std::string code="",code2="";
-			float scaleratio = 1;
-			sf::Vector2f correction;
-			if (ratio > camratio)
-			{
-				scaleratio = (float)resolution.y / camResolution.y;
-				float zone = resolution.x / 2.f - camResolution.x*scaleratio / 2.f;
-				code += "gl_FragCoord.x < "+std::to_string(zone)+" || gl_FragCoord.x > " + std::to_string(resolution.x-zone);
-				code2 = "screenpos.x-=" + std::to_string(zone)+";\n";
-				correction = sf::Vector2f(camResolution.x*scaleratio,resolution.y);
-			}
-			else
-			{
-				scaleratio = (float)resolution.x / camResolution.x;
-				float zone = resolution.y / 2.f - camResolution.y*scaleratio / 2.f;
-				code += "gl_FragCoord.y < " + std::to_string(zone) + " || gl_FragCoord.y > " + std::to_string(resolution.y - zone);
-				code2 = "screenpos.y-=" + std::to_string(zone) + ";\n";
-				correction = sf::Vector2f(resolution.x, camResolution.y*scaleratio);
-			}
-
-
-					inverse.loadFromMemory(
-				"#version 120 \n \
-				void main() \
-				{ \
-					gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; \
-					gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0; \
-					gl_FrontColor = gl_Color; \
-				}",
-				"#version 120 \n \
-				uniform sampler2D texture; \n \
-				uniform bool camera; \n \
-				vec3 filter(vec3 color) \n \
-				{\n \
-					float d = (color.r + color.g + color.b) / 3.0 < 0.5 ? 1 : 0; \n \
-					return vec3(d, d, d); \n \
-				}\n \
-				void main() \n \
-				{ \n \
-					if(!camera || "+code+") { \
-						gl_FragColor = vec4(1,1,1,1); \
-						return; \
-					} \
-					vec2 screenpos = gl_FragCoord.xy; \n \
-					"+code2+" \
-					vec2 pos = screenpos/vec2(" + std::to_string(correction.x) + "," + std::to_string(correction.y) + "); \n \
-					vec4 pixel = texture2D(texture, vec2(pos.x,1-pos.y)); \n \
-					gl_FragColor= vec4(filter(pixel.rgb),1.0); \n \
-				}");
-		}
-
-		sf::RenderStates inverseStates;
-		inverseStates.shader = &inverse;
-		inverseStates.texture = &canvas->GetTexture();
+		Hud_InverseShader inverse(resolution,camResolution);
+		inverse.states.texture = &canvas->GetTexture();
 
 		s_rf.setPosition(20, 20);
 		s_cam.setPosition(20, 40);
@@ -442,7 +387,7 @@ public:
 				}
 			}
 
-			inverse.setUniform("camera", cam.IsConnected());
+			inverse.shader.setUniform("camera", cam.IsConnected());
 
 			hud_roll->Update();
 			hud_compass->Update();
@@ -453,10 +398,11 @@ public:
 
 			window.draw(s_rf);
 			window.draw(s_cam);
-			window.draw(*hud_compass, inverseStates);
-			window.draw(*hud_roll, inverseStates);
+			window.draw(*hud_compass, inverse.states);
+			window.draw(*hud_roll, inverse.states);
 			
-			window.draw(*hud_altitude, inverseStates);
+			window.draw(*hud_altitude, inverse.states);
+			window.draw(*hud_topbar);
 
 			window.draw(debug);
 			window.display();
