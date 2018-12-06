@@ -18,12 +18,12 @@ class Hud_Compass : public Hud
 	float angle = 0.f;
 	float target = 0.f;
 	sf::Clock framerate;
-	float hud_scale;
+	float hud_scale, font_center;
+
 public:
 	Hud_Compass(const sf::Vector2i& resolution, const float& scale) : hud_scale(scale)
 	{
 		setPosition(60, 70);
-		
 		
 		lines.setPrimitiveType(sf::Lines);
 		float step = Constants::pi / 8.0f;
@@ -37,15 +37,15 @@ public:
 			if (cnt++ % 4 != 0)
 			{
 				lines.append(sf::Vertex(sf::Vector2f(
-					std::cosf(i)*45.f*scale,
-					std::sinf(i)*45.f*scale
+					std::cosf(i)*40.f*scale,
+					std::sinf(i)*40.f*scale
 				), sf::Color::White));
 			}
 			else
 			{
 				lines.append(sf::Vertex(sf::Vector2f(
-					std::cosf(i)*40.f*scale,
-					std::sinf(i)*40.f*scale
+					std::cosf(i)*35.f*scale,
+					std::sinf(i)*35.f*scale
 				), sf::Color::White));
 			}
 		}
@@ -79,20 +79,22 @@ public:
 
 			quarter[i].setFont(*ResourceManager::LoadFont("fonts/arial.ttf"));
 			quarter[i].setString(dirs[i]);
-			quarter[i].setScale(0.5,0.5);
 			const sf::FloatRect bounds = quarter[i].getLocalBounds();
 			quarter[i].setOrigin(sf::Vector2f(bounds.width,bounds.height+14.f)/2.f);
 			quarter[i].setOutlineColor(sf::Color::Black);
 			quarter[i].setOutlineThickness(2.f);
+			quarter[i].setCharacterSize(15*hud_scale);
 		}
 		degree.setFillColor(sf::Color::White);
 		degree.setOutlineColor(sf::Color::Black);
 		degree.setOutlineThickness(2.f);
 		degree.setFont(*ResourceManager::LoadFont("fonts/arial.ttf"));
 		degree.setString("0°");
-		degree.setScale(0.5, 0.5);
 		sf::FloatRect bounds = degree.getLocalBounds();
 		degree.setOrigin(sf::Vector2f(bounds.width, bounds.height+14.f) / 2.f);
+		degree.setCharacterSize(15 * hud_scale);
+
+		font_center = 15 * hud_scale / 2;
 
 		setPosition(sf::Vector2f(resolution)-(sf::Vector2f(100.0, 100.0)*scale)- sf::Vector2f(20, 20));
 	}
@@ -115,7 +117,7 @@ public:
 			//face.setRotation(angle);
 			degree.setString(std::to_string((int)angle) + "°");
 			sf::FloatRect bounds = degree.getLocalBounds();
-			degree.setOrigin(sf::Vector2f(bounds.width, bounds.height + 14.f) / 2.f);
+			degree.setOrigin(sf::Vector2f(bounds.width, bounds.height + font_center) / 2.f);
 		}
 	}
 
@@ -139,7 +141,7 @@ public:
 		for (int i = 0; i < 4; i++)
 		{
 			const float a = (-angle *Constants::deg_to_rad) + Constants::half_pi * static_cast<float>(i);
-			const sf::Vector2f pos=sf::Vector2f(std::cosf(a), std::sinf(a))*30.f;
+			const sf::Vector2f pos=sf::Vector2f(std::cosf(a), std::sinf(a))*27.f * hud_scale;
 			states.transform.translate(pos);
 			target.draw(quarter[i], states);
 			states.transform.translate(-pos);

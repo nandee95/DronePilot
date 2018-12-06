@@ -131,7 +131,6 @@
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="Hud_Canvas.hpp" />
     <ClInclude Include="Hud_Compass.hpp" />
-    <ClInclude Include="Hud_Debug.hpp" />
     <ClInclude Include="Hud_Status.hpp" />
     <ClInclude Include="Hud_Roll.hpp" />
     <ClInclude Include="Hud_TopBar.hpp" />

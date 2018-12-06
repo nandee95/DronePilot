@@ -11,7 +11,6 @@
 #include "Hud_Altitude.hpp"
 #include "Hud_Roll.hpp"
 #include "Hud_Canvas.hpp"
-#include "Hud_Debug.hpp"
 #include "Hud_TopBar.hpp"
 
 #include "CfgFile.hpp"
@@ -30,7 +29,6 @@ class Application
 	ScopedPtr<Hud_Roll> hud_roll;
 	ScopedPtr<Hud_Canvas> canvas;
 	ScopedPtr<Hud_TopBar> hud_topbar;
-	Hud_Debug debug;
 
 
 	bool running = true;
@@ -61,9 +59,12 @@ public:
 		Log::Info("Loading config file...");
 		try
 		{
+			const std::function<bool(std::string)> log_validator = [] (std::string value)->bool {
+				return value == "all" || value == "none" || value == "warning" || value == "error";
+			};
 			//Overwrite with file
 			cfg.LoadFromFile("config/drone.ini", {
-				{ "NRF24L01",{
+				{ "NRF24_USB",{
 					{ "Handshake",{ CfgFile::RegexValidator("[A-F0-9]{32}"),"00000000000000000000000000000000" } },
 					{ "BaudRate",{ CfgFile::IntListValidator({ 110, 150, 300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600 }),"9600" } },
 					{ "FriendlyName",{ CfgFile::AnyValidator, "???" } }
@@ -73,13 +74,20 @@ public:
 					{ "FriendlyName",{ CfgFile::AnyValidator, "???" } },
 					{ "Resolution",{ CfgFile::ResolutionValidator, "800x600" } },
 				} },
+				{ "Log",{
+					{ "Console",{ log_validator, "all" } },
+					{ "Hud",{ log_validator, "all" } },
+					{ "File",{ log_validator, "all" } }
+				} },
 				{ "Window",{
 					{ "Title",{ CfgFile::AnyValidator, "Drone controller" } },
 					{ "Resolution",{ CfgFile::ResolutionValidator, "800x600" } },
 					{ "Mode",{ CfgFile::IntRangeValidator(1,3), "1" } }
 				} },
 				{ "Hud",{
-					{ "Scale",{ CfgFile::FloatRangeValidator(0.1,10.0), "1.0" } }
+					{ "Scale",{ CfgFile::FloatRangeValidator(0.1,3.0), "1.0" } },
+					{ "AltMax",{ CfgFile::FloatRangeValidator(0.0,10000.0), "500.0" } },
+					{ "AltStep",{ CfgFile::FloatRangeValidator(0.0,10000.0), "50.0" } },
 				} }
 				});
 		}
@@ -327,10 +335,11 @@ public:
 		}
 
 		canvas = new Hud_Canvas(resolution, camResolution);
-		hud_altitude = new Hud_Altitude(resolution, hud_scale);
+		hud_altitude = new Hud_Altitude(resolution, hud_scale, cfg.GetValue("Hud", "AltMax").ToFloat(), cfg.GetValue("Hud", "AltStep").ToFloat());
 		hud_compass = new Hud_Compass(resolution,hud_scale);
 		hud_roll = new Hud_Roll(resolution,hud_scale);
 		hud_topbar = new Hud_TopBar(resolution, hud_scale);
+
 	}
 
 	const int Run()
@@ -370,6 +379,7 @@ public:
 		s_cam.setPosition(20, 40);
 		//alt.setPosition(20, 580);
 		sf::Event e;
+		sf::Clock test;
 		while (window.isOpen())
 		{
 			while (window.pollEvent(e))
@@ -392,7 +402,10 @@ public:
 			hud_roll->Update();
 			hud_compass->Update();
 			hud_altitude->Update();
-
+			hud_compass->Set(180.0*(float)test.getElapsedTime().asMilliseconds() / 1000.0);
+			hud_roll->Set(180.0*(float)test.getElapsedTime().asMilliseconds() / 1000.0);
+			hud_altitude->Set(500.0*std::fmod((float)test.getElapsedTime().asMilliseconds() / 1000.0,1.0));
+			
 			window.clear(sf::Color::Black);
 			if(camenabled) window.draw(*canvas);
 
@@ -404,7 +417,6 @@ public:
 			window.draw(*hud_altitude, inverse.states);
 			window.draw(*hud_topbar);
 
-			window.draw(debug);
 			window.display();
 		}
 		cleanup:

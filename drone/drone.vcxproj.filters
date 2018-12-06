@@ -62,9 +62,6 @@
     <ClInclude Include="Constants.hpp">
       <Filter>Header Files\Utilities</Filter>
     </ClInclude>
-    <ClInclude Include="Hud_Debug.hpp">
-      <Filter>Header Files\HUD</Filter>
-    </ClInclude>
     <ClInclude Include="SerialPort.hpp">
       <Filter>Header Files\Communication</Filter>
     </ClInclude>

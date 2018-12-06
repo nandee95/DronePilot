@@ -6,6 +6,7 @@
 #include <string>
 #include <sys/stat.h>
 #include <Windows.h>
+#include <SFML/System.hpp>
 
 static class Log
 {
