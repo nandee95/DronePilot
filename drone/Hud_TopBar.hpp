@@ -37,7 +37,7 @@ public:
 	void SetPing(const float value)
 	{
 		std::stringstream ss;
-		ss << std::setprecision(2) << value << "ms";
+		ss << std::setprecision(3) << value << "ms";
 		ping.setString(ss.str());
 	}
 

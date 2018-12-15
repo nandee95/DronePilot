@@ -239,7 +239,7 @@ public:
 		return written;
 	}
 
-	uint64_t SendByteArray(const int8_t* data, const size_t length)
+	uint64_t SendByteArray(const void* data, const size_t length)
 	{
 		if (!connected)
 			throw SerialPortException(SerialPortException::Error_NotConnected, "Serial port is not connected");

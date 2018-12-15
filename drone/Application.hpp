@@ -150,7 +150,7 @@ public:
 
 	static const void Communication(Application* t)
 	{
-		long ping_id = 0;
+		sf::Uint64 ping_id = 0;
 
 
 
@@ -180,7 +180,7 @@ public:
 			//t->sp.SendPacket(packet);
 
 			if (t->lastPing.getElapsedTime().asMilliseconds() > 1000)
-			{
+			{/*
 				t->lastPing.restart();
 
 				sf::Packet ping;
@@ -188,6 +188,11 @@ public:
 				t->pingTimer.restart();
 				t->sp.SendPacket(ping);
 				std::cout << "Pinging " << (ping_id-1) << std::endl;
+
+				std::cout << (int)((unsigned char*)ping.getData())[0]<<" "<<ping.getDataSize() << std::endl;*/
+				std::cout << "Pinging!" << std::endl;
+				uint8_t data[5] = {1,2,3,4,5};
+				t->sp.SendByteArray(data, 5);
 			}
 
 			std::this_thread::sleep_for(std::chrono::microseconds(33333));
@@ -237,7 +242,7 @@ public:
 				{
 					uint64_t ping_id;
 					packet >> ping_id;
-					hud_topbar->SetPing(pingTimer.restart().asMilliseconds());
+					hud_topbar->SetPing(static_cast<float>(pingTimer.restart().asMicroseconds())/1000);
 				} break;
 				}
 				
@@ -401,7 +406,7 @@ public:
 						sf::Packet p;
 						p << (unsigned char)2 << throttle;
 						sp.SendPacket(p);
-						std::cout << "Throttle:" << throttle << std::endl;
+						std::cout << "Throttle:" << (int)throttle << std::endl;
 					}
 				}
 				}
