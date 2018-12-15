@@ -30,6 +30,7 @@ class Application
 	ScopedPtr<Hud_Canvas> canvas;
 	ScopedPtr<Hud_TopBar> hud_topbar;
 
+	unsigned char throttle=0;
 
 	bool running = true;
 
@@ -66,7 +67,7 @@ public:
 			cfg.LoadFromFile("config/drone.ini", {
 				{ "NRF24_USB",{
 					{ "Handshake",{ CfgFile::RegexValidator("[A-F0-9]{32}"),"00000000000000000000000000000000" } },
-					{ "BaudRate",{ CfgFile::IntListValidator({ 110, 150, 300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600 }),"9600" } },
+					{ "BaudRate",{ CfgFile::IntListValidator({ 110, 150, 300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600 }),"115200" } },
 					{ "FriendlyName",{ CfgFile::AnyValidator, "???" } }
 				} },
 				{ "Camera",{
@@ -204,7 +205,7 @@ public:
 				s_rf.SetStatus(1);
 				if (comm && comm->joinable()) comm->join();
 				comm = std::make_shared<std::thread>(Application::Communication, this);
-
+				/*
 
 				sf::Packet handshake;
 
@@ -214,7 +215,7 @@ public:
 
 				handshake << (uint8_t)Protocol_HandShake << rand;
 
-				sp.SendPacket(handshake);
+				sp.SendPacket(handshake);*/
 			} break;
 			case SerialPort::Event_Disconnected:
 			{
@@ -236,7 +237,7 @@ public:
 				{
 					uint64_t ping_id;
 					packet >> ping_id;
-					std::cout << "Ping response: " << ping_id << " -> " << pingTimer.restart().asMilliseconds() <<"ms" << std::endl;
+					hud_topbar->SetPing(pingTimer.restart().asMilliseconds());
 				} break;
 				}
 				
@@ -289,7 +290,7 @@ public:
 			{
 				try
 				{
-					t->sp.Connect(p);
+					t->sp.Connect(p,(SerialPort::BaudRate)t->cfg.GetValue("NRF24_USB","BaudRate").ToInt());
 				}
 				catch (SerialPortException& e) {}
 
@@ -393,6 +394,15 @@ public:
 				} break;
 				case sf::Event::KeyPressed:
 				{
+					if (e.key.code == sf::Keyboard::W && throttle < 100) throttle += 10;
+					if (e.key.code == sf::Keyboard::S && throttle > 0) throttle -= 10;
+					if (sp.IsConnected() && (e.key.code == sf::Keyboard::W || e.key.code == sf::Keyboard::S))
+					{
+						sf::Packet p;
+						p << (unsigned char)2 << throttle;
+						sp.SendPacket(p);
+						std::cout << "Throttle:" << throttle << std::endl;
+					}
 				}
 				}
 			}
