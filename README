@@ -1,26 +1,35 @@
 Work in progress
 
-<h1>Dependencies:</h1>
+<br><h1>Dependencies:</h1>
 <h2>Pilot</h2>
-<a href="https://www.sfml-dev.org">SFML</a>
+<a href="https://www.sfml-dev.org">SFML</a><br>
 <a href="https://github.com/jarikomppa/escapi">escapi</a>
 
 <h2>Arduino</h2>
-<a href="https://github.com/jaretburkett/RF24-STM">RF24-STM</a>>
+<a href="https://github.com/jaretburkett/RF24-STM">RF24-STM</a><br>
 <a href="https://github.com/bolderflight/MPU9250">MPU9250</a>
 
-<h1>Hardware</h1>
+<br><h1>Hardware</h1>
 <h2>Drone</h2>
-STM32 Bluepill board
-NRF24 radio communication moudle with amplifier
+<table>
+  <thead>
+  	<tr><td>Image</td><td>Name</td><td>Specs</td><td>Pinout</td></tr>
+  </thead>
+  <tr><td><img src="https://wiki.stm32duino.com/images/thumb/d/db/STM32_Blue_Pill_perspective.jpg/450px-STM32_Blue_Pill_perspective.jpg" width=120></td><td><a href="https://wiki.stm32duino.com/index.php?title=Blue_Pill">STM32 Blue Pill</a></td><td>STM32F103C8<br>Clock: 72Mhz<br>RAM: 2KB<br>Flash: 64/128KB</td><td><a href="https://wiki.stm32duino.com/images/a/ae/Bluepillpinout.gif" target="_blank"><img src="https://wiki.stm32duino.com/images/a/ae/Bluepillpinout.gif" width=120></a></td></tr>
+  <tr><td><img src="https://lastminuteengineers.com/wp-content/uploads/2018/07/nRF24L01-PA-LNA-External-Antenna-Wireless-Transceiver-Module.png" width=120></td><td><a href="https://lastminuteengineers.com/nrf24l01-arduino-wireless-communication/">NRF24L01</a></td><td>Distance: up to 1km<br>Frequency: 2.4Ghz<br>Interface: SPI</td><td><a href="https://lastminuteengineers.com/wp-content/uploads/2018/07/Pinout-nRF24L01-PA-LNA-External-Antenna-Wireless-Transceiver-Module.png" target="_blank"><img src="https://lastminuteengineers.com/wp-content/uploads/2018/07/Pinout-nRF24L01-PA-LNA-External-Antenna-Wireless-Transceiver-Module.png" width=120></a></td></tr>
+  <tr><td><img src="https://camo.githubusercontent.com/c320f6e5db1aed989b6a1282a2ddb71582c13c60/687474703a2f2f706c617967726f756e642e61726475696e6f2e63632f75706c6f6164732f4d61696e2f6d70752d363035302e6a7067" width=120></td><td><a href="https://camo.githubusercontent.com/c320f6e5db1aed989b6a1282a2ddb71582c13c60/687474703a2f2f706c617967726f756e642e61726475696e6f2e63632f75706c6f6164732f4d61696e2f6d70752d363035302e6a7067">MPU9250</a></td><td>Distance: up to 1km<br>Frequency: 2.4Ghz</td><td><a href="https://lastminuteengineers.com/wp-content/uploads/2018/07/Pinout-nRF24L01-PA-LNA-External-Antenna-Wireless-Transceiver-Module.png" target="_blank"><img src="https://lastminuteengineers.com/wp-content/uploads/2018/07/Pinout-nRF24L01-PA-LNA-External-Antenna-Wireless-Transceiver-Module.png" width=120></a></td></tr>
+</table>
+<br>
+NRF24 radio communication moudle with amplifier<br>
 MPU9250 gyro + accelerometer + magnetometer
 
-<h2>Receiver:</h2>
+<br><h2>Receiver:</h2>
 NRF24 radio communication moudle with amplifier
 Arduino nano
 
-<h1>Future plans</h2>
+<h1>Future plans</h1>
 <ul>
 	<li>Porting the code for UNIX</li>
 	<li>Analog video feed</li>
+	<li>Ultrasonic sensor on the bottom</li>
 </ul>
