@@ -1,6 +1,35 @@
-*This text will be italic*
-_This will also be italic_
-**This text will be bold**
-__This will also be bold__
-*You **can** combine them*
- 
+Work in progress
+
+# Dependencies
+## Pilot
+[SFML](https://www.sfml-dev.org)\
+[escapi](https://github.com/jarikomppa/escapi)
+
+## Arduino
+[RF24-STM](https://github.com/jaretburkett/RF24-STM)\
+[MPU9250](https://github.com/bolderflight/MPU9250)
+
+# Hardware
+# Drone
+<table>
+  <thead>
+  	<tr><td>Image</td><td>Name</td><td>Specs</td><td>Pinout</td></tr>
+  </thead>
+  <tbody>
+  <tr><td><img src="https://wiki.stm32duino.com/images/thumb/d/db/STM32_Blue_Pill_perspective.jpg/450px-STM32_Blue_Pill_perspective.jpg" width=120></td><td><a href="https://wiki.stm32duino.com/index.php?title=Blue_Pill">STM32 Blue Pill</a></td><td>STM32F103C8<br>Clock: 72Mhz<br>RAM: 2KB<br>Flash: 64/128KB</td><td><a href="https://wiki.stm32duino.com/images/a/ae/Bluepillpinout.gif" target="_blank"><img src="https://wiki.stm32duino.com/images/a/ae/Bluepillpinout.gif" width=120></a></td></tr>
+  <tr><td><img src="https://lastminuteengineers.com/wp-content/uploads/2018/07/nRF24L01-PA-LNA-External-Antenna-Wireless-Transceiver-Module.png" width=120></td><td><a href="https://lastminuteengineers.com/nrf24l01-arduino-wireless-communication/">NRF24L01</a></td><td>Distance: up to 1km<br>Frequency: 2.4Ghz<br>Interface: SPI<br>Amplified</td><td><a href="https://lastminuteengineers.com/wp-content/uploads/2018/07/Pinout-nRF24L01-PA-LNA-External-Antenna-Wireless-Transceiver-Module.png" target="_blank"><img src="https://lastminuteengineers.com/wp-content/uploads/2018/07/Pinout-nRF24L01-PA-LNA-External-Antenna-Wireless-Transceiver-Module.png" width=120></a></td></tr>
+  <tr><td align=middle><img src="https://camo.githubusercontent.com/c320f6e5db1aed989b6a1282a2ddb71582c13c60/687474703a2f2f706c617967726f756e642e61726475696e6f2e63632f75706c6f6164732f4d61696e2f6d70752d363035302e6a7067" width=50></td><td><a href="https://camo.githubusercontent.com/c320f6e5db1aed989b6a1282a2ddb71582c13c60/687474703a2f2f706c617967726f756e642e61726475696e6f2e63632f75706c6f6164732f4d61696e2f6d70752d363035302e6a7067">MPU9250</a></td><td>Gyroscope<br>Accelerometer<br>Magnetometer</td><td>-</td></tr>
+   <tr><td align=middle><img src="https://www.makerfabs.com/image/cache/makerfabs/BMP280%20Barometer/BMP280%20Barometer_1-1000x750.jpg" width=80></td><td><a href="https://www.bosch-sensortec.com/bst/products/all_products/bmp280">BMP280</a></td><td>Barometer<br>Thermometer</td><td>-</td></tr>
+   </tbody>
+</table>
+
+
+## Receiver
+
+
+# Future plans
+<ul>
+	<li>Porting the code for UNIX</li>
+	<li>Analog video feed</li>
+	<li>Ultrasonic sensor on the bottom</li>
+</ul>
