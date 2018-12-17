@@ -16,7 +16,7 @@ SFML_Packet (will be published later)
 
 # Hardware
 ## Drone
-<table>
+<table width="100%">
   <thead>
   	<tr><td>Image</td><td>Name</td><td>Specs</td><td>Op. Voltage</td><td>Pinout</td></tr>
   </thead>
@@ -35,7 +35,7 @@ SFML_Packet (will be published later)
   	<tr><td>Image</td><td>Name</td><td>Specs</td><td>Op. Voltage</td><td>Pinout</td></tr>
   </thead>
   <tbody>
-  <tr><td><img src="http://wiki.sunfounder.cc/images/0/0c/Nano.png" width=120></td><td><a href="https://wiki.stm32duino.com/index.php?title=Blue_Pill">Arduino nano</a></td><td>ATmega328<br>Clock: 16Mhz<br>RAM: 2KB<br>Flash: 32KB</td><td>5V (USB)</td><td><a href="https://wiki.stm32duino.com/images/a/ae/Bluepillpinout.gif" target="_blank"><img src="https://wiki.stm32duino.com/images/a/ae/Bluepillpinout.gif" width=120></a></td></tr>
+  <tr><td><img src="http://wiki.sunfounder.cc/images/0/0c/Nano.png" width=120></td><td><a href="https://wiki.eprolabs.com/index.php?title=Arduino_Nano">Arduino nano</a></td><td>ATmega328<br>Clock: 16Mhz<br>RAM: 2KB<br>Flash: 32KB</td><td>5V (USB)</td><td><a href="https://simba-os.readthedocs.io/en/latest/_images/arduino-nano-pinout.png" target="_blank"><img src="https://simba-os.readthedocs.io/en/latest/_images/arduino-nano-pinout.png" width=120></a></td></tr>
   <tr><td><img src="https://lastminuteengineers.com/wp-content/uploads/2018/07/nRF24L01-PA-LNA-External-Antenna-Wireless-Transceiver-Module.png" width=120></td><td><a href="https://lastminuteengineers.com/nrf24l01-arduino-wireless-communication/">NRF24L01</a></td><td>Distance: up to 1km<br>Frequency: 2.4Ghz<br>Interface: SPI<br>Amplified</td><td>3.3V</td><td><a href="https://lastminuteengineers.com/wp-content/uploads/2018/07/Pinout-nRF24L01-PA-LNA-External-Antenna-Wireless-Transceiver-Module.png" target="_blank"><img src="https://lastminuteengineers.com/wp-content/uploads/2018/07/Pinout-nRF24L01-PA-LNA-External-Antenna-Wireless-Transceiver-Module.png" width=120></a></td></tr>
    </tbody>
 </table>
