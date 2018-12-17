@@ -16,7 +16,7 @@ SFML_Packet (will be published later)
 
 # Hardware
 ## Drone
-<table>
+<table width="100%">
   <thead>
   	<tr><td>Image</td><td>Name</td><td>Specs</td><td>Op. Voltage</td><td>Pinout</td></tr>
   </thead>
@@ -30,7 +30,7 @@ SFML_Packet (will be published later)
 </table>
 
 ## Receiver
-<table>
+<table width="100%">
   <thead>
   	<tr><td>Image</td><td>Name</td><td>Specs</td><td>Op. Voltage</td><td>Pinout</td></tr>
   </thead>
