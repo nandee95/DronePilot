@@ -5,14 +5,14 @@ Work in progress
 [SFML](https://www.sfml-dev.org)\
 [escapi](https://github.com/jarikomppa/escapi)
 
-## Onboard (Arduino)
+## Drone (Arduino)
 [RF24-STM](https://github.com/jaretburkett/RF24-STM)\
 [MPU9250](https://github.com/bolderflight/MPU9250)\
-SFML_Packet (will be published later)
+[SFML_Packet](https://github.com/nandee95/SFML_Packet)
 
 ## Transmitter (Arduino)
 [RF24](https://github.com/nRF24/RF24)\
-SFML_Packet (will be published later)
+[SFML_Packet](https://github.com/nandee95/SFML_Packet)
 
 # Hardware
 ## Drone
