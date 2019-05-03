@@ -79,7 +79,7 @@ public:
 					{ "Console",{ log_validator, "all" } },
 					{ "Hud",{ log_validator, "all" } },
 					{ "File",{ log_validator, "all" } }
-				} },
+				} }, 
 				{ "Window",{
 					{ "Title",{ CfgFile::AnyValidator, "Drone controller" } },
 					{ "Resolution",{ CfgFile::ResolutionValidator, "800x600" } },
