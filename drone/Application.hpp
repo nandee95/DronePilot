@@ -64,10 +64,10 @@ public:
 				return value == "all" || value == "none" || value == "warning" || value == "error";
 			};
 			//Overwrite with file
-			cfg.LoadFromFile("config/drone.ini", {
-				{ "NRF24_USB",{
+			cfg.LoadFromFile("config/config.ini", {
+				{ "Remote",{
 					{ "Handshake",{ CfgFile::RegexValidator("[A-F0-9]{32}"),"00000000000000000000000000000000" } },
-					{ "BaudRate",{ CfgFile::IntListValidator({ 110, 150, 300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600 }),"115200" } },
+					{ "BaudRate",{ CfgFile::IntListValidator({ 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600 }),"115200" } },
 					{ "FriendlyName",{ CfgFile::AnyValidator, "???" } }
 				} },
 				{ "Camera",{
@@ -94,8 +94,7 @@ public:
 		}
 		catch (CfgFileException& e)
 		{
-			std::cout << e.Message() << std::endl;
-			std::cout << "Generating new config file..." << std::endl;
+			Log::Warning("Config file not found! Generating new one...");
 			cfg.SaveToFile("config/drone.ini");
 		}
 
