@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <functional>
+#include <functional> 
 #include <Windows.h>
 #include <initguid.h>
 #include <devguid.h>

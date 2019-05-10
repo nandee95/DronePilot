@@ -81,6 +81,8 @@ private:
 
 		std::cout << "[" << level << "]" << " " << date << " - " << text << std::endl;
 		fs << "[" << level << "]" << " " << date << " - " << text << std::endl;
+
+		SetConsoleTextAttribute(console, color_white);
 	}
 
 };

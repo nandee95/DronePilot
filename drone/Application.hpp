@@ -39,6 +39,7 @@ class Application
 	sf::Vector2i resolution = sf::Vector2i(800, 600);
 	sf::Vector2i camResolution = sf::Vector2i(800, 600);
 	float hud_scale = 1.0;
+	bool fullscreen = false;
 
 	//Serial
 	std::shared_ptr<std::thread> reconnect_serial;
@@ -71,7 +72,7 @@ public:
 					{ "FriendlyName",{ CfgFile::AnyValidator, "???" } }
 				} },
 				{ "Camera",{
-					{ "Enabled",{ CfgFile::BoolValidator ,"True" } },
+					{ "Enabled",{ CfgFile::BoolValidator ,"False" } },
 					{ "FriendlyName",{ CfgFile::AnyValidator, "???" } },
 					{ "Resolution",{ CfgFile::ResolutionValidator, "800x600" } },
 				} },
@@ -81,9 +82,7 @@ public:
 					{ "File",{ log_validator, "all" } }
 				} }, 
 				{ "Window",{
-					{ "Title",{ CfgFile::AnyValidator, "Drone controller" } },
-					{ "Resolution",{ CfgFile::ResolutionValidator, "800x600" } },
-					{ "Mode",{ CfgFile::IntRangeValidator(1,3), "1" } }
+					{ "Title",{ CfgFile::AnyValidator, "Drone controller" } }
 				} },
 				{ "Hud",{
 					{ "Scale",{ CfgFile::FloatRangeValidator(0.1,3.0), "1.0" } },
@@ -95,11 +94,12 @@ public:
 		catch (CfgFileException& e)
 		{
 			Log::Warning("Config file not found! Generating new one...");
-			cfg.SaveToFile("config/drone.ini");
+			cfg.SaveToFile("config/config.ini");
 		}
 
 		camenabled = cfg.GetValue("Camera", "Enabled").ToBool();
-		resolution = cfg.GetValue("Window", "Resolution").ToResolution();
+		auto desktop = sf::VideoMode::getDesktopMode();
+		resolution = { (int)desktop.width,(int)desktop.height };
 		camResolution = cfg.GetValue("Camera", "Resolution").ToResolution();
 		hud_scale = cfg.GetValue("Hud", "Scale").ToFloat();
 		Log::Success("Config loaded successfully!");
@@ -107,7 +107,6 @@ public:
 
 	const void InitCamera()
 	{
-
 		if (!camenabled)
 		{
 			Log::Warning("Camera disabled!");
@@ -294,7 +293,7 @@ public:
 			{
 				try
 				{
-					t->sp.Connect(p,(SerialPort::BaudRate)t->cfg.GetValue("NRF24_USB","BaudRate").ToInt());
+					t->sp.Connect(p,(SerialPort::BaudRate)t->cfg.GetValue("Remote","BaudRate").ToInt());
 				}
 				catch (SerialPortException& e) {}
 
@@ -332,13 +331,6 @@ public:
 
 	const void InitHud()
 	{
-		uint8_t mode = cfg.GetValue("Window", "Mode").ToInt(); // 1 - windowed, 2 - borderless, 3 - fullscreen
-		if (mode == 2)
-		{
-			const sf::VideoMode vmode = sf::VideoMode().getDesktopMode();
-			resolution = sf::Vector2i(vmode.width, vmode.height);
-		}
-
 		canvas = new Hud_Canvas(resolution, camResolution);
 		hud_altitude = new Hud_Altitude(resolution, hud_scale, cfg.GetValue("Hud", "AltMax").ToFloat(), cfg.GetValue("Hud", "AltStep").ToFloat());
 		hud_compass = new Hud_Compass(resolution,hud_scale);
@@ -351,31 +343,13 @@ public:
 	{
 		sf::RenderWindow window;
 		{
-			uint8_t mode = cfg.GetValue("Window", "Mode").ToInt(); // 1 - windowed, 2 - borderless, 3 - fullscreen
-
 			sf::ContextSettings settings;
 			settings.antialiasingLevel = 8;
 			settings.majorVersion = 1;
 			settings.minorVersion = 2;
 
-			sf::Uint32 style;
-			switch (mode)
-			{
-			case 1: //Windowed
-				style = sf::Style::Titlebar | sf::Style::Close;
-				break;
-			case 2: //Borderless
-			{
-				style = sf::Style::None;
-				window.setMouseCursorVisible(false);
-			}	break;
-			case 3: //Fullscreen
-				style = sf::Style::Fullscreen;
-				window.setMouseCursorVisible(false);
-				break;
-			}
-
-			window.create(sf::VideoMode(resolution.x, resolution.y),cfg.GetValue("Window","Title").ToString(),style, settings);
+			auto desktop = sf::VideoMode::getDesktopMode();
+			window.create(sf::VideoMode(desktop.width,desktop.height),cfg.GetValue("Window","Title").ToString(), sf::Style::Titlebar | sf::Style::Close, settings);
 		}
 		Hud_InverseShader inverse(resolution,camResolution);
 		inverse.states.texture = &canvas->GetTexture();
@@ -385,6 +359,10 @@ public:
 		//alt.setPosition(20, 580);
 		sf::Event e;
 		sf::Clock test;
+
+
+		ShowWindow(window.getSystemHandle(), SW_MAXIMIZE);
+
 		while (window.isOpen())
 		{
 			while (window.pollEvent(e))
@@ -396,8 +374,29 @@ public:
 					window.close();
 					goto cleanup;
 				} break;
+				case sf::Event::Resized:
+				{
+					
+				} break;
 				case sf::Event::KeyPressed:
 				{
+					if (e.key.code == sf::Keyboard::F11)
+					{
+						if(!fullscreen)
+							window.create({ static_cast<uint32_t>(resolution.x),  static_cast<uint32_t>(resolution.y) },
+								cfg.GetValue("Window", "Title").ToString(), sf::Style::None);
+						else
+						{
+							window.create({ static_cast<uint32_t>(resolution.x),  static_cast<uint32_t>(resolution.y) },
+								cfg.GetValue("Window", "Title").ToString(), sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
+							ShowWindow(window.getSystemHandle(), SW_MAXIMIZE);
+						}
+						fullscreen = !fullscreen;
+					}
+					else if (e.key.code == sf::Keyboard::Escape)
+					{
+						window.close();
+					}
 					if (e.key.code == sf::Keyboard::W && throttle < 100) throttle += 10;
 					if (e.key.code == sf::Keyboard::S && throttle > 0) throttle -= 10;
 					if (sp.IsConnected() && (e.key.code == sf::Keyboard::W || e.key.code == sf::Keyboard::S))
