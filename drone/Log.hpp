@@ -13,6 +13,7 @@ static class Log
 private:
 	static std::mutex mu;
 	static HANDLE console;
+	static Hud_Messages* messenger;
 
 	static std::string filename;
 	static constexpr int32_t color_red = 12;
@@ -20,8 +21,9 @@ private:
 	static constexpr int32_t color_yellow = 14;
 	static constexpr int32_t color_green = 10;
 public:
-	static const void Init()
+	static const void Init(Hud_Messages* messengerptr)
 	{
+		messengerptr = messenger;
 		std::time_t t = std::time(0);
 		struct tm now;
 		localtime_s(&now, &t);
@@ -83,6 +85,19 @@ private:
 		fs << "[" << level << "]" << " " << date << " - " << text << std::endl;
 
 		SetConsoleTextAttribute(console, color_white);
+		if (messenger != nullptr)
+		{
+			sf::Color hudcolor;
+			switch (color)
+			{
+			case color_red: hudcolor = sf::Color::Red; break;
+			case color_yellow: hudcolor = sf::Color::Yellow; break;
+			case color_white: hudcolor = sf::Color::White; break;
+			case color_green: hudcolor = sf::Color::Green; break;
+			}
+
+			messenger->AddText(text, hudcolor);
+		}
 	}
 
 };
@@ -91,3 +106,4 @@ private:
 std::mutex Log::mu;
 std::string Log::filename;
 HANDLE Log::console;
+Hud_Messages* Log::messenger;

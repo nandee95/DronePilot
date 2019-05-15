@@ -86,7 +86,7 @@
     <ClInclude Include="Hud.hpp">
       <Filter>Header Files\HUD</Filter>
     </ClInclude>
-    <ClInclude Include="Hud_TopBar.hpp">
+    <ClInclude Include="Hud_Messages.hpp">
       <Filter>Header Files\HUD</Filter>
     </ClInclude>
   </ItemGroup>

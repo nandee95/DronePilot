@@ -8,17 +8,17 @@
 #include <initguid.h>
 #include <devguid.h>
 #include <setupapi.h>
+#include <mutex>
+#include <chrono>
 
-#include <SFML/Network/Packet.hpp>
-
-#include "Protocol.hpp"
+#include <iostream>
 
 class SerialPortException
 {
 public:
 	enum : uint8_t
 	{
-		Error_Unknown=0,
+		Error_Unknown = 0,
 		Error_PortNotFound,
 		Error_PortInUse,
 		Error_CommStateFail,
@@ -52,13 +52,14 @@ private:
 class SerialPort
 {
 public:
+
 	enum BaudRate
 	{
-		Baud_9600=9600,
-		Baud_19200=19200,
-		Baud_38400=38400,
-		Baud_57600=57600,
-		Baud_115200=115200
+		Baud_9600 = 9600,
+		Baud_19200 = 19200,
+		Baud_38400 = 38400,
+		Baud_57600 = 57600,
+		Baud_115200 = 115200
 	};
 
 	enum EventType
@@ -68,18 +69,20 @@ public:
 		Event_Data,
 	};
 
+	typedef std::function<void(EventType, uint8_t*, size_t)> CallbackType;
+
 	SerialPort()
 	{
-		
+
 	}
 
 	~SerialPort()
 	{
-		if(connected)
+		if (connected)
 			Disconnect();
 	}
 
-	const void SetCallback(std::function<void(EventType)> func)
+	const void SetCallback(CallbackType func)
 	{
 		callback = func;
 	}
@@ -153,9 +156,9 @@ public:
 				thread->join();
 			thread.reset();
 		}
-		
+
 		thread = std::make_shared<std::thread>(&SerialPort::SerialPortThread, this);
-		callback(Event_Connected);
+		callback(Event_Connected, nullptr, 0);
 	}
 
 	const void Disconnect()
@@ -168,75 +171,19 @@ public:
 		connected = false;
 		CloseHandle(port);
 		if (thread && thread->joinable()) thread->join();
-		callback(Event_Disconnected);
-	}
-
-	const uint8_t* GetData() const
-	{
-		return buffer;
-	}
-
-	const size_t& GetDataSize() const
-	{
-		return buffer_len;
-	}
-
-	const sf::Packet GetPacket()
-	{
-		sf::Packet packet;
-		packet.append(buffer, buffer_len);
-		return packet;
-	}
-
-
-	static const uint8_t FindDevice()
-	{
-		SP_DEVINFO_DATA data;
-		data.cbSize = sizeof(data);
-
-		HDEVINFO devInfo = SetupDiGetClassDevs(&GUID_DEVCLASS_PORTS,NULL,nullptr,DIGCF_PRESENT);
-		if (devInfo == INVALID_HANDLE_VALUE)
-		{
-			return 0;
-		}
-
-		int d = 0;
-		while (SetupDiEnumDeviceInfo(devInfo,d++,&data))
-		{
-			DWORD regDataType;
-			DWORD size = 0;
-
-			// find the size required to hold the device info
-			SetupDiGetDeviceRegistryProperty(devInfo, &data, SPDRP_HARDWAREID, nullptr, nullptr, NULL, &size);
-			BYTE* hardwareId = new BYTE[(size > 1) ? size : 1];
-			// now store it in a buffer
-			if (SetupDiGetDeviceRegistryProperty(devInfo, &data, SPDRP_HARDWAREID, &regDataType, hardwareId, sizeof(hardwareId) * size, nullptr))
-			{
-				// find the size required to hold the friendly name
-				size = 0;
-				SetupDiGetDeviceRegistryProperty(devInfo, &data, SPDRP_FRIENDLYNAME, nullptr, nullptr, 0, &size);
-				BYTE* friendlyName = new BYTE[(size > 1) ? size : 1];
-				// now store it in a buffer
-				if (!SetupDiGetDeviceRegistryProperty(devInfo, &data, SPDRP_FRIENDLYNAME, nullptr, friendlyName, sizeof(friendlyName) * size, nullptr))
-				{
-					// device does not have this property set
-					memset(friendlyName, 0, size > 1 ? size : 1);
-				}
-				// use friendlyName here
-				delete[] friendlyName;
-			}
-			delete[] hardwareId;
-		}
+		callback(Event_Disconnected, nullptr, 0);
 	}
 
 	uint64_t SendString(const std::string data)
 	{
 		if (!connected)
 			throw SerialPortException(SerialPortException::Error_NotConnected, "Serial port is not connected");
-		
+
 		DWORD written;
-		if (!WriteFile(port, data.data(), data.length(), &written, NULL))
-			throw SerialPortException(SerialPortException::Error_FailedToWrite,"Failed to write to serial port");
+		std::lock_guard<std::mutex> gu(mu);
+		if (WriteFile(port, data.c_str(), data.size(), &written, NULL) == FALSE)
+			throw SerialPortException(SerialPortException::Error_FailedToWrite, "Failed to write to serial port");
+
 		return written;
 	}
 
@@ -246,21 +193,11 @@ public:
 			throw SerialPortException(SerialPortException::Error_NotConnected, "Serial port is not connected");
 
 		DWORD written;
-		if (!WriteFile(port, data, length, &written, NULL))
+		std::lock_guard<std::mutex> gu(mu);
+		if (WriteFile(port, data, length, &written, NULL) == FALSE)
 			throw SerialPortException(SerialPortException::Error_FailedToWrite, "Failed to write to serial port");
 		return written;
 	}
-	uint64_t SendPacket(const sf::Packet& packet)
-	{
-		if (!connected)
-			throw SerialPortException(SerialPortException::Error_NotConnected, "Serial port is not connected");
-
-		DWORD written;
-		if (!WriteFile(port, packet.getData(), packet.getDataSize(), &written, NULL))
-			throw SerialPortException(SerialPortException::Error_FailedToWrite, "Failed to write to serial port");
-		return written;
-	}
-
 
 	static std::vector<uint8_t> GetAvailablePorts()
 	{
@@ -283,32 +220,32 @@ public:
 	}
 
 private:
-	static void SerialPortThread(SerialPort* t)
+	static void SerialPortThread(SerialPort * t)
 	{
 		while (t->connected)
 		{
-			if (ReadFile(t->port, &t->buffer, 256, (LPDWORD)&t->buffer_len, NULL))
-			{
-				t->callback(Event_Data);
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
+			std::lock_guard<std::mutex> gu(t->mu);
+			if (ReadFile(t->port, &t->buffer, 256, (LPDWORD)& t->bufferLen, NULL)) {
+				if (t->bufferLen != 0) t->callback(Event_Data, t->buffer, t->bufferLen);
 			}
-			else
-			{
-				break;
-			}
+			else break;
 		}
 
 		if (t->connected)
 		{
 			t->connected = false;
 			CloseHandle(t->port);
-			t->callback(Event_Disconnected);
+			t->callback(Event_Disconnected, nullptr, 0);
 		}
 	}
 
-	std::function<void(EventType)> callback;
+	CallbackType callback;
 	std::shared_ptr<std::thread> thread;
 	bool connected = false;
 	HANDLE port;
 	uint8_t buffer[256];
-	size_t buffer_len;
+	size_t bufferLen;
+
+	std::mutex mu;
 };

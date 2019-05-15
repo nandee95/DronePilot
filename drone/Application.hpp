@@ -10,8 +10,9 @@
 #include "Hud_Status.hpp"
 #include "Hud_Altitude.hpp"
 #include "Hud_Roll.hpp"
+#include "Hud_Messages.hpp"
 #include "Hud_Canvas.hpp"
-#include "Hud_TopBar.hpp"
+#include "Protocol.hpp"
 
 #include "CfgFile.hpp"
 #include "Log.hpp"
@@ -27,8 +28,8 @@ class Application
 	Hud_CAM s_cam;
 	ScopedPtr<Hud_Altitude> hud_altitude;
 	ScopedPtr<Hud_Roll> hud_roll;
+	ScopedPtr<Hud_Messages> hud_messages;
 	ScopedPtr<Hud_Canvas> canvas;
-	ScopedPtr<Hud_TopBar> hud_topbar;
 
 	unsigned char throttle=0;
 
@@ -148,50 +149,12 @@ public:
 
 	static const void Communication(Application* t)
 	{
+		return;
 		sf::Uint64 ping_id = 0;
-
-
-
 
 		while (t->running && t->sp.IsConnected())
 		{
 			sf::Clock clk;
-
-			sf::Packet packet;
-			packet << (uint8_t)Protocol_Controls;
-
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))	packet << 1.f;
-			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) packet << -1.f;
-			else packet << 0.f;
-
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))	packet << 1.f;
-			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) packet << -1.f;
-			else packet << 0.f;
-
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))	packet << 1.f;
-			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) packet << -1.f;
-			else packet << 0.f;
-
-			uint8_t binary=0;
-			binary |= sf::Keyboard::isKeyPressed(sf::Keyboard::E);
-
-			//t->sp.SendPacket(packet);
-
-			if (t->lastPing.getElapsedTime().asMilliseconds() > 1000)
-			{/*
-				t->lastPing.restart();
-
-				sf::Packet ping;
-				ping << (uint8_t)Protocol_Ping << ping_id++;
-				t->pingTimer.restart();
-				t->sp.SendPacket(ping);
-				std::cout << "Pinging " << (ping_id-1) << std::endl;
-
-				std::cout << (int)((unsigned char*)ping.getData())[0]<<" "<<ping.getDataSize() << std::endl;*/
-				std::cout << "Pinging!" << std::endl;
-				uint8_t data[5] = {1,2,3,4,5};
-				t->sp.SendByteArray(data, 5);
-			}
 
 			std::this_thread::sleep_for(std::chrono::microseconds(33333));
 		}
@@ -199,7 +162,7 @@ public:
 
 	const void InitSerial()
 	{
-		sp.SetCallback([&](SerialPort::EventType e) {
+		sp.SetCallback([&](SerialPort::EventType e,uint8_t* data,size_t len) {
 			switch (e)
 			{
 			case SerialPort::Event_Connected:
@@ -229,18 +192,21 @@ public:
 			} break;
 			case SerialPort::Event_Data:
 			{
-				sf::Packet packet = sp.GetPacket();
-
-				uint8_t protocol=0;
-				packet >> protocol;
-
+				uint8_t protocol=data[0];
+				std::cout << "Packet received on protocol: " << (int)protocol << std::endl;
 				switch (protocol)
 				{
-				case Protocol::Protocol_Ping:
+				case Protocol::SensorReport:
 				{
-					uint64_t ping_id;
-					packet >> ping_id;
-					hud_topbar->SetPing(static_cast<float>(pingTimer.restart().asMicroseconds())/1000);
+					Protocol_SensorReport* packet = (Protocol_SensorReport*)data;
+					//hud_roll->Set(packet->gyro.X);
+					std::cout << "roll X: " << packet->gyro.X << std::endl;
+					std::cout << "roll Y: " << packet->gyro.Y << std::endl;
+					std::cout << "roll Z: " << packet->gyro.Z << std::endl;
+					for (int i = 0; i < len; i++)
+					{
+						std::cout << (int)data[i] << std::endl;
+					}
 				} break;
 				}
 				
@@ -253,7 +219,7 @@ public:
 
 	Application()
 	{
-		Log::Init();
+		Log::Init(hud_messages.ptr);
 		Camera::Init();
 
 		LoadConfig();
@@ -334,9 +300,17 @@ public:
 		canvas = new Hud_Canvas(resolution, camResolution);
 		hud_altitude = new Hud_Altitude(resolution, hud_scale, cfg.GetValue("Hud", "AltMax").ToFloat(), cfg.GetValue("Hud", "AltStep").ToFloat());
 		hud_compass = new Hud_Compass(resolution,hud_scale);
-		hud_roll = new Hud_Roll(resolution,hud_scale);
-		hud_topbar = new Hud_TopBar(resolution, hud_scale);
+		hud_roll = new Hud_Roll();
+		hud_messages = new Hud_Messages();
+	}
 
+	const void SetResolution(sf::RenderWindow& window, sf::Vector2i resolution)
+	{
+		sf::FloatRect visibleArea(0, 0, resolution.x, resolution.y);
+		window.setView(sf::View(visibleArea));
+
+		hud_roll->UpdateResolution(resolution, 1.0);
+		hud_messages->UpdateResolution(resolution, 1.0);
 	}
 
 	const int Run()
@@ -349,7 +323,7 @@ public:
 			settings.minorVersion = 2;
 
 			auto desktop = sf::VideoMode::getDesktopMode();
-			window.create(sf::VideoMode(desktop.width,desktop.height),cfg.GetValue("Window","Title").ToString(), sf::Style::Titlebar | sf::Style::Close, settings);
+			window.create(sf::VideoMode(800,600),cfg.GetValue("Window","Title").ToString(), sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize, settings);
 		}
 		Hud_InverseShader inverse(resolution,camResolution);
 		inverse.states.texture = &canvas->GetTexture();
@@ -359,8 +333,7 @@ public:
 		//alt.setPosition(20, 580);
 		sf::Event e;
 		sf::Clock test;
-
-
+		SetResolution(window, { 800,600 });
 		ShowWindow(window.getSystemHandle(), SW_MAXIMIZE);
 
 		while (window.isOpen())
@@ -376,7 +349,14 @@ public:
 				} break;
 				case sf::Event::Resized:
 				{
-					
+					if (e.size.width < 800 || e.size.height < 600)
+					{
+						if (e.size.width < 800) e.size.width = 800;
+						if (e.size.height < 600) e.size.height = 600;
+						window.setSize({ e.size.width, e.size.height });
+					}
+				
+					SetResolution(window, {static_cast<int32_t>(e.size.width),static_cast<int32_t>(e.size.height)});
 				} break;
 				case sf::Event::KeyPressed:
 				{
@@ -397,14 +377,9 @@ public:
 					{
 						window.close();
 					}
-					if (e.key.code == sf::Keyboard::W && throttle < 100) throttle += 10;
-					if (e.key.code == sf::Keyboard::S && throttle > 0) throttle -= 10;
-					if (sp.IsConnected() && (e.key.code == sf::Keyboard::W || e.key.code == sf::Keyboard::S))
+					if (e.key.code == sf::Keyboard::Space)
 					{
-						sf::Packet p;
-						p << (unsigned char)2 << throttle;
-						sp.SendPacket(p);
-						std::cout << "Throttle:" << (int)throttle << std::endl;
+						hud_messages->AddText("Test message " + std::to_string(rand() % 255),sf::Color::Red);
 					}
 				}
 				}
@@ -415,8 +390,8 @@ public:
 			hud_roll->Update();
 			hud_compass->Update();
 			hud_altitude->Update();
+			hud_messages->Update();
 			hud_compass->Set(180.0*(float)test.getElapsedTime().asMilliseconds() / 1000.0);
-			hud_roll->Set(180.0*(float)test.getElapsedTime().asMilliseconds() / 1000.0);
 			hud_altitude->Set(500.0*std::fmod((float)test.getElapsedTime().asMilliseconds() / 1000.0,1.0));
 			
 			window.clear(sf::Color::Black);
@@ -424,11 +399,11 @@ public:
 
 			window.draw(s_rf);
 			window.draw(s_cam);
+			window.draw(*hud_messages);
 			window.draw(*hud_compass, inverse.states);
 			window.draw(*hud_roll, inverse.states);
 			
 			window.draw(*hud_altitude, inverse.states);
-			window.draw(*hud_topbar);
 
 			window.display();
 		}
